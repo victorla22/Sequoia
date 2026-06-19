@@ -3,8 +3,8 @@ import { PageCard } from './PageCard.tsx';
 export function Accounts() {
   return (
     <PageCard
-      title="Accounts"
-      description="A placeholder area for future account information and organization."
+      title="Comptes"
+      description="Una àrea provisional per a la informació i l’organització futures dels comptes."
     />
   );
 }

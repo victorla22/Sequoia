@@ -10,11 +10,11 @@ export function Header({ pages, activePage, onNavigate }: HeaderProps) {
   return (
     <header className="site-header">
       <div>
-        <p className="eyebrow">Proyecto Sequoia</p>
+        <p className="eyebrow">Projecte Sequoia</p>
         <h1>Sequoia</h1>
       </div>
 
-      <nav className="site-nav" aria-label="Main navigation">
+      <nav className="site-nav" aria-label="Navegació principal">
         {Object.entries(pages).map(([key, page]) => {
           const pageKey = key as PageKey;
           const isActive = activePage === pageKey;

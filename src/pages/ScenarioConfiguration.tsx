@@ -3,8 +3,8 @@ import { PageCard } from './PageCard.tsx';
 export function ScenarioConfiguration() {
   return (
     <PageCard
-      title="Scenario Configuration"
-      description="A placeholder page for setting up assumptions and scenario details later."
+      title="Configuració d’escenari"
+      description="Una pàgina provisional per configurar més endavant els supòsits i els detalls de l’escenari."
     />
   );
 }
