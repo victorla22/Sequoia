@@ -1,0 +1,49 @@
+import type { Account } from '../models/account.ts';
+
+export const mockAccounts: Account[] = [
+  {
+    id: 'main-current-account',
+    name: 'Compte corrent principal',
+    type: 'current',
+    balance: 4200,
+    annualReturn: 0,
+    notes: 'Despeses quotidianes i ingressos de nòmina.',
+    active: true,
+  },
+  {
+    id: 'emergency-savings',
+    name: 'Estalvis d’emergència',
+    type: 'savings',
+    balance: 12500,
+    annualReturn: 2.1,
+    notes: 'L’objectiu és cobrir sis mesos de despeses.',
+    active: true,
+  },
+  {
+    id: 'long-term-index-fund',
+    name: 'Fons indexat a llarg termini',
+    type: 'investment',
+    balance: 38600,
+    annualReturn: 5.5,
+    notes: 'Supòsit de creixement provisional per a simulacions futures.',
+    active: true,
+  },
+  {
+    id: 'car-loan',
+    name: 'Préstec del cotxe',
+    type: 'debt',
+    balance: 7800,
+    annualReturn: 4.2,
+    notes: 'Passiu d’exemple per incloure en el patrimoni net.',
+    active: true,
+  },
+  {
+    id: 'old-brokerage-account',
+    name: 'Compte d’inversió antic',
+    type: 'investment',
+    balance: 950,
+    annualReturn: 3.4,
+    notes: '',
+    active: false,
+  },
+];

@@ -9,19 +9,19 @@ export type PageKey = 'dashboard' | 'accounts' | 'scenario' | 'results';
 
 const pages: Record<PageKey, { label: string; content: ReactNode }> = {
   dashboard: {
-    label: 'Dashboard',
+    label: 'Panell',
     content: <Dashboard />,
   },
   accounts: {
-    label: 'Accounts',
+    label: 'Comptes',
     content: <Accounts />,
   },
   scenario: {
-    label: 'Scenario Configuration',
+    label: 'Configuració d’escenari',
     content: <ScenarioConfiguration />,
   },
   results: {
-    label: 'Results',
+    label: 'Resultats',
     content: <Results />,
   },
 };
