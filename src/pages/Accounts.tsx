@@ -13,10 +13,10 @@ const percentFormatter = new Intl.NumberFormat('en-IE', {
 });
 
 const accountTypeLabels: Record<Account['type'], string> = {
-  current: 'Current',
-  savings: 'Savings',
-  investment: 'Investment',
-  debt: 'Debt',
+  current: 'Corrent',
+  savings: 'Estalvis',
+  investment: 'Inversió',
+  debt: 'Deute',
 };
 
 function formatEuros(value: number) {
@@ -42,29 +42,29 @@ export function Accounts() {
   return (
     <section className="accounts-page">
       <div className="accounts-header">
-        <p className="eyebrow">Mock account overview</p>
-        <h2>Accounts</h2>
+        <p className="eyebrow">Vista general de comptes de mostra</p>
+        <h2>Comptes</h2>
         <p>
-          A first version of the accounts area using example data only. Create,
-          edit, delete, and persistence will come later.
+          Una primera versió de l’àrea de comptes que només utilitza dades d’exemple.
+          La creació, l’edició, l’eliminació i la persistència arribaran més endavant.
         </p>
       </div>
 
-      <div className="accounts-summary" aria-label="Accounts summary">
+      <div className="accounts-summary" aria-label="Resum de comptes">
         <article className="summary-card">
-          <span>Total gross assets</span>
+          <span>Patrimoni brut</span>
           <strong>{formatEuros(totalGrossAssets)}</strong>
         </article>
         <article className="summary-card">
-          <span>Total debt</span>
+          <span>Deute total</span>
           <strong>{formatEuros(totalDebt)}</strong>
         </article>
         <article className="summary-card">
-          <span>Net worth</span>
+          <span>Patrimoni net</span>
           <strong>{formatEuros(netWorth)}</strong>
         </article>
         <article className="summary-card">
-          <span>Active accounts</span>
+          <span>Comptes actius</span>
           <strong>{activeAccountCount}</strong>
         </article>
       </div>
@@ -78,17 +78,17 @@ export function Accounts() {
                 <h3>{account.name}</h3>
               </div>
               <span className={account.active ? 'status active' : 'status inactive'}>
-                {account.active ? 'Active' : 'Inactive'}
+                {account.active ? 'Actiu' : 'Inactiu'}
               </span>
             </div>
 
             <dl className="account-details">
               <div>
-                <dt>Balance</dt>
+                <dt>Saldo</dt>
                 <dd>{formatEuros(account.balance)}</dd>
               </div>
               <div>
-                <dt>Annual return</dt>
+                <dt>Rendibilitat anual</dt>
                 <dd>{formatAnnualReturn(account.annualReturn)}</dd>
               </div>
             </dl>
