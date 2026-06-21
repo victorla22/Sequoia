@@ -260,3 +260,222 @@ button {
     flex-direction: column;
   }
 }
+
+.scenario-page,
+.results-page {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.scenario-header,
+.results-header,
+.scenario-card,
+.chart-card,
+.annual-table-card {
+  background: #ffffff;
+  border: 1px solid #ded8ca;
+  border-radius: 24px;
+  box-shadow: 0 18px 45px rgba(32, 75, 48, 0.08);
+  padding: clamp(1.5rem, 4vw, 3rem);
+}
+
+.scenario-header h2,
+.results-header h2 {
+  font-size: clamp(2rem, 6vw, 4rem);
+  line-height: 1.1;
+  margin: 0 0 1rem;
+}
+
+.scenario-header p:last-child,
+.results-header p:last-child,
+.scenario-card-header p:last-child {
+  color: #556158;
+  font-size: 1.1rem;
+  margin: 0;
+  max-width: 760px;
+}
+
+.scenario-card-header,
+.chart-header,
+.configuration-item {
+  align-items: flex-start;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.scenario-card h3,
+.chart-card h3,
+.annual-table-card h3,
+.configuration-item h3 {
+  margin: 0;
+}
+
+.scenario-assumptions,
+.results-kpis {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.scenario-assumptions {
+  border-top: 1px solid #eee7da;
+  margin: 1.5rem 0 0;
+  padding-top: 1.5rem;
+}
+
+.scenario-assumptions dt,
+.scenario-assumptions dd {
+  margin: 0;
+}
+
+.scenario-assumptions dt {
+  color: #59715f;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.scenario-assumptions dd {
+  color: #203526;
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin-top: 0.2rem;
+}
+
+.configuration-toolbar {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.filter-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.filter-tab,
+.placeholder-action {
+  border-radius: 999px;
+  border: 1px solid #ded8ca;
+  padding: 0.55rem 0.85rem;
+}
+
+.filter-tab {
+  background: #ffffff;
+  color: #2f4637;
+  cursor: pointer;
+}
+
+.filter-tab.active {
+  background: #2f6f46;
+  border-color: #204b30;
+  color: #ffffff;
+}
+
+.placeholder-action {
+  background: #e9e4d8;
+  color: #756146;
+  cursor: not-allowed;
+}
+
+.configuration-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.configuration-item {
+  background: #ffffff;
+  border: 1px solid #ded8ca;
+  border-radius: 20px;
+  box-shadow: 0 12px 30px rgba(32, 75, 48, 0.06);
+  padding: 1.25rem;
+}
+
+.configuration-item strong {
+  color: #203526;
+  font-size: 1.25rem;
+  white-space: nowrap;
+}
+
+.chart-header span,
+.chart-legend {
+  color: #59715f;
+  font-weight: 700;
+}
+
+.projection-chart {
+  background: linear-gradient(180deg, #f8fbf8 0%, #f2ede1 100%);
+  border: 1px solid #eee7da;
+  border-radius: 16px;
+  height: 260px;
+  margin-top: 1.25rem;
+  width: 100%;
+}
+
+.projection-line {
+  fill: none;
+  stroke: #2f6f46;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.fire-line {
+  stroke: #c57b36;
+  stroke-dasharray: 4 4;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-top: 0.9rem;
+}
+
+.table-scroll {
+  margin-top: 1rem;
+  overflow-x: auto;
+}
+
+.annual-table {
+  border-collapse: collapse;
+  min-width: 760px;
+  width: 100%;
+}
+
+.annual-table th,
+.annual-table td {
+  border-bottom: 1px solid #eee7da;
+  padding: 0.75rem;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.annual-table th:first-child,
+.annual-table td:first-child {
+  text-align: left;
+}
+
+.annual-table th {
+  color: #59715f;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 640px) {
+  .scenario-card-header,
+  .configuration-item,
+  .chart-header {
+    flex-direction: column;
+  }
+}

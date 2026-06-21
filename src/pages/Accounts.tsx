@@ -1,16 +1,7 @@
 import { mockAccounts } from '../data/mockAccounts.ts';
 import type { Account } from '../models/account.ts';
+import { formatEuros, formatPercent } from '../utils/formatters.ts';
 
-const euroFormatter = new Intl.NumberFormat('en-IE', {
-  style: 'currency',
-  currency: 'EUR',
-});
-
-const percentFormatter = new Intl.NumberFormat('en-IE', {
-  maximumFractionDigits: 1,
-  minimumFractionDigits: 1,
-  style: 'percent',
-});
 
 const accountTypeLabels: Record<Account['type'], string> = {
   current: 'Corrent',
@@ -19,13 +10,6 @@ const accountTypeLabels: Record<Account['type'], string> = {
   debt: 'Deute',
 };
 
-function formatEuros(value: number) {
-  return euroFormatter.format(value);
-}
-
-function formatAnnualReturn(value: number) {
-  return percentFormatter.format(value / 100);
-}
 
 export function Accounts() {
   const totalGrossAssets = mockAccounts
@@ -89,7 +73,7 @@ export function Accounts() {
               </div>
               <div>
                 <dt>Rendibilitat anual</dt>
-                <dd>{formatAnnualReturn(account.annualReturn)}</dd>
+                <dd>{formatPercent(account.annualReturn)}</dd>
               </div>
             </dl>
 
