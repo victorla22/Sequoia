@@ -526,7 +526,8 @@ button {
 
 .form-grid input,
 .form-grid select,
-.form-grid textarea {
+.form-grid textarea,
+.scenario-field input {
   background: #fbfaf6;
   border: 1px solid #ded8ca;
   border-radius: 12px;
@@ -557,9 +558,9 @@ button {
 
 .primary-action,
 .secondary-action,
-.danger-action {
+.danger-action,
+.reset-action {
   border-radius: 999px;
-  border: 1px solid transparent;
   cursor: pointer;
   font-weight: 700;
   padding: 0.55rem 0.9rem;
@@ -567,22 +568,69 @@ button {
 
 .primary-action {
   background: #2f6f46;
+  border: 1px solid transparent;
   color: #ffffff;
 }
 
 .secondary-action {
   background: #edf3ed;
-  border-color: #d5e1d5;
+  border: 1px solid #d5e1d5;
   color: #2f4637;
 }
 
 .danger-action {
   background: #f7e7df;
-  border-color: #edc9b7;
+  border: 1px solid #edc9b7;
   color: #8a3c1f;
 }
 
 .card-actions {
   border-top: 1px solid #eee7da;
   padding-top: 1rem;
+}
+
+.scenario-form {
+  border-top: 1px solid #eee7da;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+}
+
+.scenario-field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.scenario-field span {
+  color: #59715f;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.scenario-field input {
+  width: 100%;
+}
+
+.form-grid input:focus,
+.form-grid select:focus,
+.form-grid textarea:focus,
+.scenario-field input:focus {
+  border-color: #2f6f46;
+  box-shadow: 0 0 0 3px rgba(47, 111, 70, 0.14);
+  outline: none;
+}
+
+.reset-action {
+  background: #2f6f46;
+  border: 1px solid #204b30;
+  color: #ffffff;
+  margin-top: 1.25rem;
+}
+
+.reset-action:hover {
+  background: #255838;
 }

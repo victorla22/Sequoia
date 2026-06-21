@@ -1,21 +1,24 @@
-import { baseScenario } from '../data/mockScenarios.ts';
+import type { Account } from '../models/account.ts';
+import type { Scenario } from '../models/scenario.ts';
 import { formatCompactEuros, formatEuros } from '../utils/formatters.ts';
 import { runAnnualSimulation } from '../utils/simulation.ts';
-import type { Account } from '../models/account.ts';
 
 type ResultsProps = {
   accounts: Account[];
+  scenario: Scenario;
 };
 
-export function Results({ accounts }: ResultsProps) {
-  const simulation = runAnnualSimulation(accounts, baseScenario);
+export function Results({ accounts, scenario }: ResultsProps) {
+  const simulation = runAnnualSimulation(accounts, scenario);
+  const netWorthValues = simulation.rows.map((row) => row.endingNetWorth);
   const chartCeiling = Math.max(
-    baseScenario.fireTarget,
+    scenario.fireTarget,
     simulation.initialNetWorth,
     simulation.finalNetWorth,
-    ...simulation.rows.map((row) => row.endingNetWorth),
+    ...netWorthValues,
     1,
   );
+
   const chartPoints = simulation.rows
     .map((row, index) => {
       const x = (index / Math.max(simulation.rows.length - 1, 1)) * 100;
@@ -24,15 +27,16 @@ export function Results({ accounts }: ResultsProps) {
       return `${x},${y}`;
     })
     .join(' ');
-  const fireLineY = Math.min(100, Math.max(0, 100 - (baseScenario.fireTarget / chartCeiling) * 88));
+
+  const fireLineY = Math.min(100, Math.max(0, 100 - (scenario.fireTarget / chartCeiling) * 88));
 
   return (
     <section className="results-page">
       <div className="results-header">
-        <p className="eyebrow">Resultats de demostració</p>
+        <p className="eyebrow">Resultats de l’escenari</p>
         <h2>Resultats</h2>
         <p>
-          Projecció anual simplificada basada en els comptes editables i l’escenari base.
+          Projecció anual simplificada basada en els comptes editables i l’escenari actual.
           És una simulació temporal per validar el flux, no el motor financer final.
         </p>
       </div>
@@ -44,7 +48,7 @@ export function Results({ accounts }: ResultsProps) {
         </article>
         <article className="summary-card">
           <span>Objectiu FIRE</span>
-          <strong>{formatEuros(baseScenario.fireTarget)}</strong>
+          <strong>{formatEuros(scenario.fireTarget)}</strong>
         </article>
         <article className="summary-card">
           <span>Any estimat FIRE</span>
@@ -62,15 +66,23 @@ export function Results({ accounts }: ResultsProps) {
             <p className="eyebrow">Patrimoni net projectat</p>
             <h3>Evolució anual</h3>
           </div>
-          <span>{baseScenario.startYear}–{baseScenario.startYear + baseScenario.horizonYears - 1}</span>
+          <span>
+            {scenario.startYear}–{scenario.startYear + scenario.horizonYears - 1}
+          </span>
         </div>
-        <svg className="projection-chart" role="img" aria-label="Gràfic del patrimoni net projectat" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <svg
+          className="projection-chart"
+          role="img"
+          aria-label="Gràfic del patrimoni net projectat"
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+        >
           <line className="fire-line" x1="0" x2="100" y1={fireLineY} y2={fireLineY} />
           <polyline className="projection-line" points={chartPoints} />
         </svg>
         <div className="chart-legend">
           <span>Inici: {formatCompactEuros(simulation.initialNetWorth)}</span>
-          <span>Objectiu: {formatCompactEuros(baseScenario.fireTarget)}</span>
+          <span>Objectiu: {formatCompactEuros(scenario.fireTarget)}</span>
           <span>Final: {formatCompactEuros(simulation.finalNetWorth)}</span>
         </div>
       </article>

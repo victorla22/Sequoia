@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Header } from './components/Header.tsx';
+import { useScenarioSettings } from './hooks/useScenarioSettings.ts';
 import { Accounts } from './pages/Accounts.tsx';
 import { Dashboard } from './pages/Dashboard.tsx';
 import { Results } from './pages/Results.tsx';
@@ -19,11 +20,14 @@ const pageLabels: Record<PageKey, string> = {
 function buildPages(
   accounts: Account[],
   setAccounts: (accounts: Account[]) => void,
+  scenario: ReturnType<typeof useScenarioSettings>['scenario'],
+  setScenario: ReturnType<typeof useScenarioSettings>['setScenario'],
+  resetScenario: ReturnType<typeof useScenarioSettings>['resetScenario'],
 ): Record<PageKey, { label: string; content: ReactNode }> {
   return {
     dashboard: {
       label: pageLabels.dashboard,
-      content: <Dashboard accounts={accounts} />,
+      content: <Dashboard accounts={accounts} scenario={scenario} />,
     },
     accounts: {
       label: pageLabels.accounts,
@@ -31,23 +35,37 @@ function buildPages(
     },
     scenario: {
       label: pageLabels.scenario,
-      content: <ScenarioConfiguration />,
+      content: (
+        <ScenarioConfiguration
+          scenario={scenario}
+          onResetScenario={resetScenario}
+          onScenarioChange={setScenario}
+        />
+      ),
     },
     results: {
       label: pageLabels.results,
-      content: <Results accounts={accounts} />,
+      content: <Results accounts={accounts} scenario={scenario} />,
     },
   };
 }
 
 function App() {
   const [activePage, setActivePage] = useState<PageKey>('dashboard');
+  const { scenario, setScenario, resetScenario } = useScenarioSettings();
   const [accounts, setAccounts] = useState<Account[]>(loadStoredAccounts);
-  const pages = buildPages(accounts, setAccounts);
 
   useEffect(() => {
     persistAccounts(accounts);
   }, [accounts]);
+
+  const pages = buildPages(
+    accounts,
+    setAccounts,
+    scenario,
+    setScenario,
+    resetScenario,
+  );
 
   return (
     <div className="app-shell">

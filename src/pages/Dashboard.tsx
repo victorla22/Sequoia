@@ -1,35 +1,36 @@
 import type { Account } from '../models/account.ts';
-import { calculateAccountSummary } from '../utils/accounts.ts';
+import type { Scenario } from '../models/scenario.ts';
 import { formatEuros } from '../utils/formatters.ts';
+import { runAnnualSimulation } from '../utils/simulation.ts';
+import { PageCard } from './PageCard.tsx';
 
 type DashboardProps = {
   accounts: Account[];
+  scenario: Scenario;
 };
 
-export function Dashboard({ accounts }: DashboardProps) {
-  const summary = calculateAccountSummary(accounts);
-  const netWorth = summary.totalGrossAssets - summary.totalDebt;
+export function Dashboard({ accounts, scenario }: DashboardProps) {
+  const simulation = runAnnualSimulation(accounts, scenario);
 
   return (
     <section className="dashboard-page">
-      <article className="page-card">
-        <p className="eyebrow">Panell local</p>
-        <h2>Panell</h2>
-        <p>Un punt de partida senzill per revisar l’experiència global de planificació de Sequoia.</p>
-      </article>
+      <PageCard
+        title="Panell"
+        description="Un punt de partida senzill per revisar l’experiència global de planificació de Sequoia."
+      />
 
-      <div className="accounts-summary" aria-label="Resum inicial del panell">
+      <div className="accounts-summary" aria-label="Resum de l’escenari actual">
         <article className="summary-card">
           <span>Patrimoni net inicial</span>
-          <strong>{formatEuros(netWorth)}</strong>
+          <strong>{formatEuros(simulation.initialNetWorth)}</strong>
         </article>
         <article className="summary-card">
-          <span>Patrimoni brut</span>
-          <strong>{formatEuros(summary.totalGrossAssets)}</strong>
+          <span>Objectiu FIRE</span>
+          <strong>{formatEuros(scenario.fireTarget)}</strong>
         </article>
         <article className="summary-card">
-          <span>Deute total</span>
-          <strong>{formatEuros(summary.totalDebt)}</strong>
+          <span>Any estimat FIRE</span>
+          <strong>{simulation.fireYear ?? 'No assolit'}</strong>
         </article>
       </div>
     </section>

@@ -38,16 +38,26 @@ export function runAnnualSimulation(
   const initialNetWorth = calculateInitialNetWorth(accounts);
   const rows: AnnualSimulationRow[] = [];
   let previousNetWorth = initialNetWorth;
-  let expenses = scenario.annualExpenses;
+  let expenses = Number.isFinite(scenario.annualExpenses) ? scenario.annualExpenses : 0;
   let fireYear: number | null = null;
+  const horizonYears = Math.max(0, Math.floor(scenario.horizonYears || 0));
+  const startYear = Number.isFinite(scenario.startYear) ? scenario.startYear : new Date().getFullYear();
+  const annualIncome = Number.isFinite(scenario.annualIncome) ? scenario.annualIncome : 0;
+  const annualExpectedReturn = Number.isFinite(scenario.annualExpectedReturn)
+    ? scenario.annualExpectedReturn
+    : 0;
+  const annualExpenseInflation = Number.isFinite(scenario.annualExpenseInflation)
+    ? scenario.annualExpenseInflation
+    : 0;
+  const fireTarget = Number.isFinite(scenario.fireTarget) ? scenario.fireTarget : 0;
 
-  for (let index = 0; index < scenario.horizonYears; index += 1) {
-    const year = scenario.startYear + index;
-    const income = scenario.annualIncome;
+  for (let index = 0; index < horizonYears; index += 1) {
+    const year = startYear + index;
+    const income = annualIncome;
     const annualSavings = income - expenses;
     const endingNetWorth =
-      previousNetWorth * (1 + scenario.annualExpectedReturn / 100) + annualSavings;
-    const fireReached = endingNetWorth >= scenario.fireTarget;
+      previousNetWorth * (1 + annualExpectedReturn / 100) + annualSavings;
+    const fireReached = endingNetWorth >= fireTarget;
 
     if (fireReached && fireYear === null) {
       fireYear = year;
@@ -63,7 +73,7 @@ export function runAnnualSimulation(
     });
 
     previousNetWorth = endingNetWorth;
-    expenses *= 1 + scenario.annualExpenseInflation / 100;
+    expenses *= 1 + annualExpenseInflation / 100;
   }
 
   return {
