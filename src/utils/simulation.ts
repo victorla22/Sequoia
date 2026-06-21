@@ -19,6 +19,10 @@ export type SimulationResult = {
 
 export function calculateInitialNetWorth(accounts: Account[]) {
   return accounts.reduce((total, account) => {
+    if (!account.active) {
+      return total;
+    }
+
     if (account.type === 'debt') {
       return total - account.balance;
     }

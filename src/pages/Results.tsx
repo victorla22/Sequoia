@@ -1,19 +1,30 @@
-import { mockAccounts } from '../data/mockAccounts.ts';
 import { baseScenario } from '../data/mockScenarios.ts';
 import { formatCompactEuros, formatEuros } from '../utils/formatters.ts';
 import { runAnnualSimulation } from '../utils/simulation.ts';
+import type { Account } from '../models/account.ts';
 
-export function Results() {
-  const simulation = runAnnualSimulation(mockAccounts, baseScenario);
-  const maxNetWorth = Math.max(...simulation.rows.map((row) => row.endingNetWorth));
+type ResultsProps = {
+  accounts: Account[];
+};
+
+export function Results({ accounts }: ResultsProps) {
+  const simulation = runAnnualSimulation(accounts, baseScenario);
+  const chartCeiling = Math.max(
+    baseScenario.fireTarget,
+    simulation.initialNetWorth,
+    simulation.finalNetWorth,
+    ...simulation.rows.map((row) => row.endingNetWorth),
+    1,
+  );
   const chartPoints = simulation.rows
     .map((row, index) => {
       const x = (index / Math.max(simulation.rows.length - 1, 1)) * 100;
-      const y = 100 - (row.endingNetWorth / maxNetWorth) * 88;
+      const y = Math.min(100, Math.max(0, 100 - (row.endingNetWorth / chartCeiling) * 88));
 
       return `${x},${y}`;
     })
     .join(' ');
+  const fireLineY = Math.min(100, Math.max(0, 100 - (baseScenario.fireTarget / chartCeiling) * 88));
 
   return (
     <section className="results-page">
@@ -21,7 +32,7 @@ export function Results() {
         <p className="eyebrow">Resultats de demostració</p>
         <h2>Resultats</h2>
         <p>
-          Projecció anual simplificada basada en els comptes de mostra i l’escenari base.
+          Projecció anual simplificada basada en els comptes editables i l’escenari base.
           És una simulació temporal per validar el flux, no el motor financer final.
         </p>
       </div>
@@ -54,7 +65,7 @@ export function Results() {
           <span>{baseScenario.startYear}–{baseScenario.startYear + baseScenario.horizonYears - 1}</span>
         </div>
         <svg className="projection-chart" role="img" aria-label="Gràfic del patrimoni net projectat" viewBox="0 0 100 100" preserveAspectRatio="none">
-          <line className="fire-line" x1="0" x2="100" y1={100 - (baseScenario.fireTarget / maxNetWorth) * 88} y2={100 - (baseScenario.fireTarget / maxNetWorth) * 88} />
+          <line className="fire-line" x1="0" x2="100" y1={fireLineY} y2={fireLineY} />
           <polyline className="projection-line" points={chartPoints} />
         </svg>
         <div className="chart-legend">
