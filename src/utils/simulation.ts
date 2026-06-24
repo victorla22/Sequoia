@@ -1,5 +1,6 @@
 import type { Account } from '../models/account.ts';
 import type { Scenario } from '../models/scenario.ts';
+import type { Transfer } from '../models/transfer.ts';
 
 export type SimulatedAccountYear = {
   year: number;
@@ -15,6 +16,8 @@ export type SimulatedAccount = {
   initialBalance: number;
   finalBalance: number;
   approximateCumulativeReturn: number;
+  incomingTransfers: number;
+  outgoingTransfers: number;
   includedInFireNetWorth: boolean;
   hasNegativeBalance: boolean;
   rows: SimulatedAccountYear[];
@@ -78,6 +81,7 @@ export function calculateInitialFireNetWorth(accounts: Account[]) {
 export function runAnnualSimulation(
   accounts: Account[],
   scenario: Scenario,
+  transfers: Transfer[] = [],
 ): SimulationResult {
   const activeAccounts = accounts.filter((account) => account.active);
   const simulatedAccounts: SimulatedAccount[] = activeAccounts.map((account) => ({
@@ -87,6 +91,8 @@ export function runAnnualSimulation(
     initialBalance: safeNumber(account.balance),
     finalBalance: safeNumber(account.balance),
     approximateCumulativeReturn: 0,
+    incomingTransfers: 0,
+    outgoingTransfers: 0,
     includedInFireNetWorth: isIncludedInFireNetWorth(account),
     hasNegativeBalance: safeNumber(account.balance) < 0,
     rows: [],
@@ -112,6 +118,36 @@ export function runAnnualSimulation(
     const yearStartingBalances = simulatedAccounts.map((account) => account.finalBalance);
 
     for (let monthIndex = 0; monthIndex < 12; monthIndex += 1) {
+      const simulationMonth = yearIndex * 12 + monthIndex + 1;
+
+      transfers.forEach((transfer) => {
+        if (!transfer.isActive) {
+          return;
+        }
+
+        const fromIndex = simulatedAccounts.findIndex((account) => account.id === transfer.fromAccountId);
+        const toIndex = simulatedAccounts.findIndex((account) => account.id === transfer.toAccountId);
+        const startMonth = transfer.startMonth ?? 1;
+        const endMonth = transfer.endMonth ?? horizonYears * 12;
+        const monthlyAmount = safeNumber(transfer.monthlyAmount);
+
+        if (
+          fromIndex < 0 ||
+          toIndex < 0 ||
+          fromIndex === toIndex ||
+          monthlyAmount <= 0 ||
+          simulationMonth < startMonth ||
+          simulationMonth > endMonth
+        ) {
+          return;
+        }
+
+        simulatedAccounts[fromIndex].finalBalance -= monthlyAmount;
+        simulatedAccounts[fromIndex].outgoingTransfers += monthlyAmount;
+        simulatedAccounts[toIndex].finalBalance += monthlyAmount;
+        simulatedAccounts[toIndex].incomingTransfers += monthlyAmount;
+      });
+
       simulatedAccounts.forEach((account, accountIndex) => {
         if (account.type === 'debt') {
           return;
@@ -123,7 +159,7 @@ export function runAnnualSimulation(
         account.finalBalance *= Number.isFinite(monthlyReturn) ? 1 + monthlyReturn : 1;
       });
 
-      // Temporary simple cashflow rule: until transfers/allocation rules exist,
+      // Temporary simple cashflow rule: until allocation rules exist,
       // add the net monthly cashflow to the first active non-debt account,
       // preferring a current account when available.
       if (cashflowAccountIndex >= 0) {
@@ -131,7 +167,7 @@ export function runAnnualSimulation(
       }
 
       simulatedAccounts.forEach((account) => {
-        if (account.finalBalance < 0) {
+        if (account.finalBalance <= 0) {
           account.hasNegativeBalance = true;
         }
       });
@@ -160,9 +196,10 @@ export function runAnnualSimulation(
     simulatedAccounts.forEach((account, accountIndex) => {
       const startingBalance = yearStartingBalances[accountIndex] ?? 0;
       const endingBalance = account.finalBalance;
+      const approximateReturnAmount = endingBalance - account.initialBalance - account.incomingTransfers + account.outgoingTransfers;
       const approximateCumulativeReturn = account.initialBalance === 0
         ? 0
-        : ((endingBalance - account.initialBalance) / Math.abs(account.initialBalance)) * 100;
+        : (approximateReturnAmount / Math.abs(account.initialBalance)) * 100;
 
       account.approximateCumulativeReturn = approximateCumulativeReturn;
       account.rows.push({

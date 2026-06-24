@@ -527,7 +527,8 @@ button {
 .form-grid input,
 .form-grid select,
 .form-grid textarea,
-.scenario-field input {
+.scenario-field input,
+.scenario-field select {
   background: #fbfaf6;
   border: 1px solid #ded8ca;
   border-radius: 12px;
@@ -611,14 +612,16 @@ button {
   text-transform: uppercase;
 }
 
-.scenario-field input {
+.scenario-field input,
+.scenario-field select {
   width: 100%;
 }
 
 .form-grid input:focus,
 .form-grid select:focus,
 .form-grid textarea:focus,
-.scenario-field input:focus {
+.scenario-field input:focus,
+.scenario-field select:focus {
   border-color: #2f6f46;
   box-shadow: 0 0 0 3px rgba(47, 111, 70, 0.14);
   outline: none;
@@ -666,4 +669,22 @@ button {
   font-weight: 700;
   margin: 0;
   padding: 1rem 1.25rem;
+}
+
+.transfer-list {
+  margin-top: 1.5rem;
+}
+
+.transfer-list .configuration-item {
+  align-items: center;
+}
+
+.transfer-list .configuration-item p:last-child {
+  color: #556158;
+  margin: 0.35rem 0 0;
+}
+
+.transfer-list .card-actions {
+  border-top: 0;
+  padding-top: 0;
 }
