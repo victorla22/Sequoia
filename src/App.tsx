@@ -1,10 +1,12 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Header } from './components/Header.tsx';
 import { useScenarioSettings } from './hooks/useScenarioSettings.ts';
 import { Accounts } from './pages/Accounts.tsx';
 import { Dashboard } from './pages/Dashboard.tsx';
 import { Results } from './pages/Results.tsx';
 import { ScenarioConfiguration } from './pages/ScenarioConfiguration.tsx';
+import type { Account } from './models/account.ts';
+import { loadStoredAccounts, persistAccounts } from './utils/accounts.ts';
 
 export type PageKey = 'dashboard' | 'accounts' | 'scenario' | 'results';
 
@@ -15,18 +17,21 @@ const pageLabels: Record<PageKey, string> = {
   results: 'Resultats',
 };
 
-function App() {
-  const [activePage, setActivePage] = useState<PageKey>('dashboard');
-  const { scenario, setScenario, resetScenario } = useScenarioSettings();
-
-  const pages: Record<PageKey, { label: string; content: ReactNode }> = {
+function buildPages(
+  accounts: Account[],
+  setAccounts: (accounts: Account[]) => void,
+  scenario: ReturnType<typeof useScenarioSettings>['scenario'],
+  setScenario: ReturnType<typeof useScenarioSettings>['setScenario'],
+  resetScenario: ReturnType<typeof useScenarioSettings>['resetScenario'],
+): Record<PageKey, { label: string; content: ReactNode }> {
+  return {
     dashboard: {
       label: pageLabels.dashboard,
-      content: <Dashboard scenario={scenario} />,
+      content: <Dashboard accounts={accounts} scenario={scenario} />,
     },
     accounts: {
       label: pageLabels.accounts,
-      content: <Accounts />,
+      content: <Accounts accounts={accounts} onAccountsChange={setAccounts} />,
     },
     scenario: {
       label: pageLabels.scenario,
@@ -40,9 +45,27 @@ function App() {
     },
     results: {
       label: pageLabels.results,
-      content: <Results scenario={scenario} />,
+      content: <Results accounts={accounts} scenario={scenario} />,
     },
   };
+}
+
+function App() {
+  const [activePage, setActivePage] = useState<PageKey>('dashboard');
+  const { scenario, setScenario, resetScenario } = useScenarioSettings();
+  const [accounts, setAccounts] = useState<Account[]>(loadStoredAccounts);
+
+  useEffect(() => {
+    persistAccounts(accounts);
+  }, [accounts]);
+
+  const pages = buildPages(
+    accounts,
+    setAccounts,
+    scenario,
+    setScenario,
+    resetScenario,
+  );
 
   return (
     <div className="app-shell">
