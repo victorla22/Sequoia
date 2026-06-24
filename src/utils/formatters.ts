@@ -18,14 +18,18 @@ export const percentFormatter = new Intl.NumberFormat('ca-ES', {
   style: 'percent',
 });
 
+function safeFormatNumber(value: number) {
+  return Number.isFinite(value) ? value : 0;
+}
+
 export function formatEuros(value: number) {
-  return euroFormatter.format(value);
+  return euroFormatter.format(safeFormatNumber(value));
 }
 
 export function formatCompactEuros(value: number) {
-  return compactEuroFormatter.format(value);
+  return compactEuroFormatter.format(safeFormatNumber(value));
 }
 
 export function formatPercent(value: number) {
-  return percentFormatter.format(value / 100);
+  return percentFormatter.format(safeFormatNumber(value) / 100);
 }

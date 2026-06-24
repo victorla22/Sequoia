@@ -6,7 +6,9 @@ import { Dashboard } from './pages/Dashboard.tsx';
 import { Results } from './pages/Results.tsx';
 import { ScenarioConfiguration } from './pages/ScenarioConfiguration.tsx';
 import type { Account } from './models/account.ts';
+import type { Transfer } from './models/transfer.ts';
 import { loadStoredAccounts, persistAccounts } from './utils/accounts.ts';
+import { loadStoredTransfers, persistTransfers } from './utils/transfers.ts';
 
 export type PageKey = 'dashboard' | 'accounts' | 'scenario' | 'results';
 
@@ -20,6 +22,8 @@ const pageLabels: Record<PageKey, string> = {
 function buildPages(
   accounts: Account[],
   setAccounts: (accounts: Account[]) => void,
+  transfers: Transfer[],
+  setTransfers: (transfers: Transfer[]) => void,
   scenario: ReturnType<typeof useScenarioSettings>['scenario'],
   setScenario: ReturnType<typeof useScenarioSettings>['setScenario'],
   resetScenario: ReturnType<typeof useScenarioSettings>['resetScenario'],
@@ -39,13 +43,16 @@ function buildPages(
         <ScenarioConfiguration
           scenario={scenario}
           onResetScenario={resetScenario}
+          accounts={accounts}
+          transfers={transfers}
+          onTransfersChange={setTransfers}
           onScenarioChange={setScenario}
         />
       ),
     },
     results: {
       label: pageLabels.results,
-      content: <Results accounts={accounts} scenario={scenario} />,
+      content: <Results accounts={accounts} scenario={scenario} transfers={transfers} />,
     },
   };
 }
@@ -54,14 +61,21 @@ function App() {
   const [activePage, setActivePage] = useState<PageKey>('dashboard');
   const { scenario, setScenario, resetScenario } = useScenarioSettings();
   const [accounts, setAccounts] = useState<Account[]>(loadStoredAccounts);
+  const [transfers, setTransfers] = useState<Transfer[]>(() => loadStoredTransfers(accounts));
 
   useEffect(() => {
     persistAccounts(accounts);
   }, [accounts]);
 
+  useEffect(() => {
+    persistTransfers(transfers);
+  }, [transfers]);
+
   const pages = buildPages(
     accounts,
     setAccounts,
+    transfers,
+    setTransfers,
     scenario,
     setScenario,
     resetScenario,

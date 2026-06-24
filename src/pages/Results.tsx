@@ -1,19 +1,21 @@
 import { useMemo, useState } from 'react';
 import type { Account } from '../models/account.ts';
 import type { Scenario } from '../models/scenario.ts';
+import type { Transfer } from '../models/transfer.ts';
 import { formatCompactEuros, formatEuros, formatPercent } from '../utils/formatters.ts';
 import { runAnnualSimulation } from '../utils/simulation.ts';
 
 type ResultsProps = {
   accounts: Account[];
   scenario: Scenario;
+  transfers: Transfer[];
 };
 
 type ResultsFilter = 'all' | 'fire' | `account:${string}`;
 
-export function Results({ accounts, scenario }: ResultsProps) {
+export function Results({ accounts, scenario, transfers }: ResultsProps) {
   const [selectedFilter, setSelectedFilter] = useState<ResultsFilter>('all');
-  const simulation = runAnnualSimulation(accounts, scenario);
+  const simulation = runAnnualSimulation(accounts, scenario, transfers);
   const activeAccounts = useMemo(() => accounts.filter((account) => account.active), [accounts]);
   const selectedAccountId = selectedFilter.startsWith('account:')
     ? selectedFilter.replace('account:', '')
@@ -53,6 +55,7 @@ export function Results({ accounts, scenario }: ResultsProps) {
 
   const fireLineY = Math.min(100, Math.max(0, 100 - (scenario.fireTarget / chartCeiling) * 88));
   const hasNegativeBalance = selectedAccount?.hasNegativeBalance ?? simulation.hasNegativeBalance;
+  const negativeAccounts = simulation.accounts.filter((account) => account.hasNegativeBalance).map((account) => account.name);
 
   return (
     <section className="results-page">
@@ -79,7 +82,7 @@ export function Results({ accounts, scenario }: ResultsProps) {
       </article>
 
       {hasNegativeBalance && (
-        <p className="warning-message">Aquest compte podria quedar en negatiu durant la simulació.</p>
+        <p className="warning-message">{selectedAccount ? `El compte ${selectedAccount.name} podria quedar en negatiu durant la simulació.` : negativeAccounts.length === 1 ? `El compte ${negativeAccounts[0]} podria quedar en negatiu durant la simulació.` : 'Aquest compte podria quedar en negatiu durant la simulació.'}</p>
       )}
 
       <div className="results-kpis" aria-label="Indicadors principals">
@@ -92,10 +95,20 @@ export function Results({ accounts, scenario }: ResultsProps) {
           <strong>{formatEuros(finalValue)}</strong>
         </article>
         {selectedAccount ? (
-          <article className="summary-card">
-            <span>Rendibilitat acumulada aproximada</span>
-            <strong>{formatPercent(selectedAccount.approximateCumulativeReturn)}</strong>
-          </article>
+          <>
+            <article className="summary-card">
+              <span>Transferències rebudes</span>
+              <strong>{formatEuros(selectedAccount.incomingTransfers)}</strong>
+            </article>
+            <article className="summary-card">
+              <span>Transferències enviades</span>
+              <strong>{formatEuros(selectedAccount.outgoingTransfers)}</strong>
+            </article>
+            <article className="summary-card">
+              <span>Rendibilitat acumulada aproximada</span>
+              <strong>{formatPercent(selectedAccount.approximateCumulativeReturn)}</strong>
+            </article>
+          </>
         ) : (
           <>
             <article className="summary-card">
