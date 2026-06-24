@@ -8,4 +8,5 @@ export type Account = {
   annualReturn: number;
   notes: string;
   active: boolean;
+  includeInFireNetWorth?: boolean;
 };

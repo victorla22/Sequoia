@@ -634,3 +634,36 @@ button {
 .reset-action:hover {
   background: #255838;
 }
+.results-filter {
+  color: #2f4637;
+  display: grid;
+  font-weight: 700;
+  gap: 0.4rem;
+  max-width: 320px;
+}
+
+.results-filter span {
+  color: #59715f;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.results-filter select {
+  background: #fbfaf6;
+  border: 1px solid #ded8ca;
+  border-radius: 12px;
+  color: #203526;
+  font: inherit;
+  padding: 0.75rem 0.85rem;
+}
+
+.warning-message {
+  background: #fff4df;
+  border: 1px solid #e4b968;
+  border-radius: 16px;
+  color: #755018;
+  font-weight: 700;
+  margin: 0;
+  padding: 1rem 1.25rem;
+}

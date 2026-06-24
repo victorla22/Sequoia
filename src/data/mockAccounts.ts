@@ -9,6 +9,7 @@ export const mockAccounts: Account[] = [
     annualReturn: 0,
     notes: 'Despeses quotidianes i ingressos de nòmina.',
     active: true,
+    includeInFireNetWorth: true,
   },
   {
     id: 'emergency-savings',
@@ -18,6 +19,7 @@ export const mockAccounts: Account[] = [
     annualReturn: 2.1,
     notes: 'L’objectiu és cobrir sis mesos de despeses.',
     active: true,
+    includeInFireNetWorth: true,
   },
   {
     id: 'long-term-index-fund',
@@ -27,6 +29,7 @@ export const mockAccounts: Account[] = [
     annualReturn: 5.5,
     notes: 'Supòsit de creixement provisional per a simulacions futures.',
     active: true,
+    includeInFireNetWorth: true,
   },
   {
     id: 'car-loan',
@@ -36,6 +39,7 @@ export const mockAccounts: Account[] = [
     annualReturn: 4.2,
     notes: 'Passiu d’exemple per incloure en el patrimoni net.',
     active: true,
+    includeInFireNetWorth: false,
   },
   {
     id: 'old-brokerage-account',
@@ -45,5 +49,6 @@ export const mockAccounts: Account[] = [
     annualReturn: 3.4,
     notes: '',
     active: false,
+    includeInFireNetWorth: true,
   },
 ];
