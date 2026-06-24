@@ -17,24 +17,40 @@ function isValidAccountType(value: unknown): value is AccountType {
   return typeof value === 'string' && accountTypes.includes(value as AccountType);
 }
 
-function isValidAccount(value: unknown): value is Account {
+function normalizeAccount(value: unknown): Account | null {
   if (!value || typeof value !== 'object') {
-    return false;
+    return null;
   }
 
   const account = value as Partial<Account>;
 
-  return (
-    typeof account.id === 'string' &&
-    account.id.trim().length > 0 &&
-    typeof account.name === 'string' &&
-    isValidAccountType(account.type) &&
-    isFiniteNumber(account.balance) &&
-    isFiniteNumber(account.annualReturn) &&
-    typeof account.notes === 'string' &&
-    typeof account.active === 'boolean'
-  );
+  if (
+    typeof account.id !== 'string' ||
+    account.id.trim().length === 0 ||
+    typeof account.name !== 'string' ||
+    !isValidAccountType(account.type) ||
+    !isFiniteNumber(account.balance) ||
+    !isFiniteNumber(account.annualReturn) ||
+    typeof account.notes !== 'string' ||
+    typeof account.active !== 'boolean'
+  ) {
+    return null;
+  }
+
+  return {
+    id: account.id,
+    name: account.name,
+    type: account.type,
+    balance: account.balance,
+    annualReturn: account.annualReturn,
+    notes: account.notes,
+    active: account.active,
+    includeInFireNetWorth: typeof account.includeInFireNetWorth === 'boolean'
+      ? account.includeInFireNetWorth
+      : account.type !== 'debt',
+  };
 }
+
 
 export function loadStoredAccounts(): Account[] {
   try {
@@ -46,11 +62,17 @@ export function loadStoredAccounts(): Account[] {
 
     const parsedAccounts: unknown = JSON.parse(storedAccounts);
 
-    if (!Array.isArray(parsedAccounts) || !parsedAccounts.every(isValidAccount)) {
+    if (!Array.isArray(parsedAccounts)) {
       return cloneMockAccounts();
     }
 
-    return parsedAccounts.map((account) => ({ ...account }));
+    const normalizedAccounts = parsedAccounts.map(normalizeAccount);
+
+    if (normalizedAccounts.some((account) => account === null)) {
+      return cloneMockAccounts();
+    }
+
+    return normalizedAccounts.filter((account): account is Account => account !== null).map((account) => ({ ...account }));
   } catch {
     return cloneMockAccounts();
   }

@@ -18,6 +18,7 @@ type AccountFormState = {
   annualReturn: string;
   notes: string;
   active: boolean;
+  includeInFireNetWorth: boolean;
 };
 
 type AccountsProps = {
@@ -33,6 +34,7 @@ const emptyForm: AccountFormState = {
   annualReturn: '',
   notes: '',
   active: true,
+  includeInFireNetWorth: true,
 };
 
 function toSafeNumber(value: string) {
@@ -62,6 +64,7 @@ function accountToForm(account: Account): AccountFormState {
     annualReturn: String(account.annualReturn),
     notes: account.notes,
     active: account.active,
+    includeInFireNetWorth: account.includeInFireNetWorth ?? account.type !== 'debt',
   };
 }
 
@@ -86,6 +89,7 @@ export function Accounts({ accounts, onAccountsChange }: AccountsProps) {
       annualReturn: toSafeNumber(form.annualReturn),
       notes: form.notes.trim(),
       active: form.active,
+      includeInFireNetWorth: form.includeInFireNetWorth,
     };
 
     if (isEditing) {
@@ -152,6 +156,7 @@ export function Accounts({ accounts, onAccountsChange }: AccountsProps) {
           <label>Rendibilitat anual esperada<input inputMode="decimal" type="number" value={form.annualReturn} onChange={(event) => setForm({ ...form, annualReturn: event.target.value })} /></label>
           <label className="form-wide">Notes<textarea value={form.notes} onChange={(event) => setForm({ ...form, notes: event.target.value })} /></label>
           <label className="checkbox-field"><input checked={form.active} type="checkbox" onChange={(event) => setForm({ ...form, active: event.target.checked })} />Actiu</label>
+          <label className="checkbox-field"><input checked={form.includeInFireNetWorth} type="checkbox" onChange={(event) => setForm({ ...form, includeInFireNetWorth: event.target.checked })} />Incloure en patrimoni FIRE</label>
         </div>
 
         <div className="form-actions">
@@ -164,7 +169,7 @@ export function Accounts({ accounts, onAccountsChange }: AccountsProps) {
         {accounts.map((account) => (
           <article className="account-card" key={account.id}>
             <div className="account-card-header"><div><p className="account-type">{accountTypeLabels[account.type]}</p><h3>{account.name}</h3></div><span className={account.active ? 'status active' : 'status inactive'}>{account.active ? 'Actiu' : 'Inactiu'}</span></div>
-            <dl className="account-details"><div><dt>Saldo</dt><dd>{formatEuros(account.balance)}</dd></div><div><dt>Rendibilitat anual</dt><dd>{formatPercent(account.annualReturn)}</dd></div></dl>
+            <dl className="account-details"><div><dt>Saldo</dt><dd>{formatEuros(account.balance)}</dd></div><div><dt>Rendibilitat anual</dt><dd>{formatPercent(account.annualReturn)}</dd></div><div><dt>Patrimoni FIRE</dt><dd>{account.includeInFireNetWorth !== false && account.type !== 'debt' ? 'Sí' : 'No'}</dd></div></dl>
             {account.notes && <p className="account-notes">{account.notes}</p>}
             <div className="card-actions"><button className="secondary-action" onClick={() => setForm(accountToForm(account))} type="button">Editar</button><button className="secondary-action" onClick={() => handleToggleActive(account.id)} type="button">{account.active ? 'Marcar inactiu' : 'Marcar actiu'}</button><button className="danger-action" onClick={() => handleDelete(account.id)} type="button">Eliminar</button></div>
           </article>
