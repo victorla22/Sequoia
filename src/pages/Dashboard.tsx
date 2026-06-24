@@ -1,15 +1,16 @@
-import { mockAccounts } from '../data/mockAccounts.ts';
+import type { Account } from '../models/account.ts';
 import type { Scenario } from '../models/scenario.ts';
 import { formatEuros } from '../utils/formatters.ts';
 import { runAnnualSimulation } from '../utils/simulation.ts';
 import { PageCard } from './PageCard.tsx';
 
 type DashboardProps = {
+  accounts: Account[];
   scenario: Scenario;
 };
 
-export function Dashboard({ scenario }: DashboardProps) {
-  const simulation = runAnnualSimulation(mockAccounts, scenario);
+export function Dashboard({ accounts, scenario }: DashboardProps) {
+  const simulation = runAnnualSimulation(accounts, scenario);
 
   return (
     <section className="dashboard-page">
