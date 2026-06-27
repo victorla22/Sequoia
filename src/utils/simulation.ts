@@ -11,12 +11,14 @@ export type SimulationResult = { initialNetWorth: number; initialFireNetWorth: n
 type MutableSimulatedAccount = SimulatedAccount & { activeInSimulation: boolean; annualReturn: number };
 
 function safeNumber(value: number | undefined) { return Number.isFinite(value) ? Number(value) : 0; }
-function monthSerial(year: number, month: number) { return year * 12 + month - 1; }
-function isSameMonth(rule: FutureRule, year: number, month: number) { return rule.startYear === year && rule.startMonth === month; }
-function isBetweenRuleDates(rule: FutureRule, year: number, month: number) {
-  const current = monthSerial(year, month);
-  const start = monthSerial(rule.startYear, rule.startMonth);
-  const end = rule.endYear && rule.endMonth ? monthSerial(rule.endYear, rule.endMonth) : Number.POSITIVE_INFINITY;
+function getMonthIndex(year: number, month: number, scenarioStartYear: number) {
+  return (year - scenarioStartYear) * 12 + month;
+}
+function isRuleOneOffInMonth(rule: FutureRule, year: number, month: number) { return rule.startYear === year && rule.startMonth === month; }
+function isRuleActiveInMonth(rule: FutureRule, year: number, month: number, scenarioStartYear: number) {
+  const current = getMonthIndex(year, month, scenarioStartYear);
+  const start = getMonthIndex(rule.startYear, rule.startMonth, scenarioStartYear);
+  const end = rule.endYear && rule.endMonth ? getMonthIndex(rule.endYear, rule.endMonth, scenarioStartYear) : Number.POSITIVE_INFINITY;
   return current >= start && current <= end;
 }
 
@@ -72,15 +74,17 @@ export function runAnnualSimulation(accounts: Account[], scenario: Scenario, tra
   for (let yearIndex = 0; yearIndex < horizonYears; yearIndex += 1) {
     const year = startYear + yearIndex;
     const yearStartingBalances = simulatedAccounts.map((account) => account.finalBalance);
+    let futureRuleIncome = 0;
+    let futureRuleExpenses = 0;
     for (let monthIndex = 0; monthIndex < 12; monthIndex += 1) {
       const calendarMonth = monthIndex + 1;
       if (options?.stopYear === year && options.stopMonth === calendarMonth && options.includeTargetMonth === false) break;
-      const simulationMonth = yearIndex * 12 + calendarMonth;
+      const simulationMonth = getMonthIndex(year, calendarMonth, startYear);
       const activeRules = futureRules.filter((rule) => rule.isActive);
 
       // Monthly order: 1 account activations, 2 extraordinary income and structural salary, 3 one-off transfers,
       // 4 recurrent monthly transfers, 5 one-off expenses and structural costs, 6 account deactivations, 7 returns.
-      activeRules.filter((rule) => rule.type === 'activate-account' && isSameMonth(rule, year, calendarMonth)).forEach((rule) => {
+      activeRules.filter((rule) => rule.type === 'activate-account' && isRuleOneOffInMonth(rule, year, calendarMonth)).forEach((rule) => {
         const account = simulatedAccounts.find((candidate) => candidate.id === rule.toAccountId);
         if (account) account.activeInSimulation = true;
       });
@@ -88,13 +92,13 @@ export function runAnnualSimulation(accounts: Account[], scenario: Scenario, tra
       activeRules.forEach((rule) => {
         const amount = safeNumber(rule.amount);
         if (amount <= 0) return;
-        if ((rule.type === 'extraordinary-income' && isSameMonth(rule, year, calendarMonth)) || (rule.type === 'structural-salary-increase' && isBetweenRuleDates(rule, year, calendarMonth))) {
+        if ((rule.type === 'extraordinary-income' && isRuleOneOffInMonth(rule, year, calendarMonth)) || (rule.type === 'structural-salary-increase' && isRuleActiveInMonth(rule, year, calendarMonth, startYear))) {
           const account = findActiveAccount(simulatedAccounts, rule.toAccountId);
-          if (account) { account.finalBalance += amount; account.incomingTransfers += amount; }
+          if (account) { account.finalBalance += amount; account.incomingTransfers += amount; futureRuleIncome += amount; }
         }
       });
 
-      activeRules.filter((rule) => rule.type === 'one-off-transfer' && isSameMonth(rule, year, calendarMonth)).forEach((rule) => {
+      activeRules.filter((rule) => rule.type === 'one-off-transfer' && isRuleOneOffInMonth(rule, year, calendarMonth)).forEach((rule) => {
         const amount = safeNumber(rule.amount);
         const from = findActiveAccount(simulatedAccounts, rule.fromAccountId);
         const to = simulatedAccounts.find((account) => account.id === rule.toAccountId && (account.activeInSimulation || rule.activateDestinationAccount));
@@ -116,13 +120,13 @@ export function runAnnualSimulation(accounts: Account[], scenario: Scenario, tra
       activeRules.forEach((rule) => {
         const amount = safeNumber(rule.amount);
         if (amount <= 0) return;
-        if ((rule.type === 'one-off-expense' && isSameMonth(rule, year, calendarMonth)) || (rule.type === 'structural-cost-increase' && isBetweenRuleDates(rule, year, calendarMonth))) {
+        if ((rule.type === 'one-off-expense' && isRuleOneOffInMonth(rule, year, calendarMonth)) || (rule.type === 'structural-cost-increase' && isRuleActiveInMonth(rule, year, calendarMonth, startYear))) {
           const account = findActiveAccount(simulatedAccounts, rule.fromAccountId);
-          if (account) { account.finalBalance -= amount; account.outgoingTransfers += amount; addWarning(warnings, account); }
+          if (account) { account.finalBalance -= amount; account.outgoingTransfers += amount; futureRuleExpenses += amount; addWarning(warnings, account); }
         }
       });
 
-      activeRules.filter((rule) => rule.type === 'deactivate-account' && isSameMonth(rule, year, calendarMonth)).forEach((rule) => {
+      activeRules.filter((rule) => rule.type === 'deactivate-account' && isRuleOneOffInMonth(rule, year, calendarMonth)).forEach((rule) => {
         const account = findActiveAccount(simulatedAccounts, rule.fromAccountId);
         if (account && Math.abs(account.finalBalance) < 0.01) account.activeInSimulation = false;
       });
@@ -150,7 +154,7 @@ export function runAnnualSimulation(accounts: Account[], scenario: Scenario, tra
       account.approximateCumulativeReturn = account.initialBalance === 0 ? 0 : (approximateReturnAmount / Math.abs(account.initialBalance)) * 100;
       account.rows.push({ year, startingBalance, endingBalance: account.finalBalance, approximateCumulativeReturn: account.approximateCumulativeReturn });
     });
-    rows.push({ year, income: annualIncome, expenses: annualExpenses, annualSavings: annualIncome - annualExpenses, endingNetWorth, endingFireNetWorth, fireReached });
+    rows.push({ year, income: annualIncome + futureRuleIncome, expenses: annualExpenses + futureRuleExpenses, annualSavings: annualIncome + futureRuleIncome - annualExpenses - futureRuleExpenses, endingNetWorth, endingFireNetWorth, fireReached });
     annualExpenses *= 1 + annualExpenseInflation / 100; monthlyExpenses = annualExpenses / 12;
     if (options?.stopYear === year) break;
   }
