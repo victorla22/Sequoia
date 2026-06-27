@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import type { Account } from '../models/account.ts';
 import type { Scenario } from '../models/scenario.ts';
 import type { Transfer } from '../models/transfer.ts';
+import type { FutureRule } from '../models/futureRule.ts';
 import { formatCompactEuros, formatEuros, formatPercent } from '../utils/formatters.ts';
 import { runAnnualSimulation } from '../utils/simulation.ts';
 
@@ -9,13 +10,14 @@ type ResultsProps = {
   accounts: Account[];
   scenario: Scenario;
   transfers: Transfer[];
+  futureRules: FutureRule[];
 };
 
 type ResultsFilter = 'all' | 'fire' | `account:${string}`;
 
-export function Results({ accounts, scenario, transfers }: ResultsProps) {
+export function Results({ accounts, scenario, transfers, futureRules }: ResultsProps) {
   const [selectedFilter, setSelectedFilter] = useState<ResultsFilter>('all');
-  const simulation = runAnnualSimulation(accounts, scenario, transfers);
+  const simulation = runAnnualSimulation(accounts, scenario, transfers, futureRules);
   const activeAccounts = useMemo(() => accounts.filter((account) => account.active), [accounts]);
   const selectedAccountId = selectedFilter.startsWith('account:')
     ? selectedFilter.replace('account:', '')
@@ -81,7 +83,9 @@ export function Results({ accounts, scenario, transfers }: ResultsProps) {
         </label>
       </article>
 
-      {hasNegativeBalance && (
+      {simulation.warnings.map((warning) => <p className="warning-message" key={warning}>{warning}</p>)}
+
+      {hasNegativeBalance && simulation.warnings.length === 0 && (
         <p className="warning-message">{selectedAccount ? `El compte ${selectedAccount.name} podria quedar en negatiu durant la simulació.` : negativeAccounts.length === 1 ? `El compte ${negativeAccounts[0]} podria quedar en negatiu durant la simulació.` : 'Aquest compte podria quedar en negatiu durant la simulació.'}</p>
       )}
 
